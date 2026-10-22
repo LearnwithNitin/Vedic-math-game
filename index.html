@@ -1,0 +1,656 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vedic Maths Speed Challenge</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #e0f2fe, #fef3c7);
+      color: #1e293b;
+      text-align: center;
+    }
+
+    .game {
+      max-width: 650px;
+      margin: 20px auto;
+      padding: 28px;
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    }
+
+    h1 {
+      color: #1d4ed8;
+      margin-top: 0;
+      font-size: 30px;
+    }
+
+    .subtitle {
+      color: #64748b;
+      margin-bottom: 22px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .pill {
+      padding: 10px 14px;
+      background: #eff6ff;
+      border-radius: 12px;
+      font-weight: bold;
+    }
+
+    #timer {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    #soundBtn {
+      background: #475569;
+      color: white;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .progress-track {
+      height: 10px;
+      width: 100%;
+      background: #e2e8f0;
+      border-radius: 20px;
+      overflow: hidden;
+      margin: 16px 0 24px;
+    }
+
+    #progress {
+      height: 100%;
+      width: 0%;
+      background: #22c55e;
+      transition: width 0.3s;
+    }
+
+    #question {
+      font-size: 38px;
+      font-weight: bold;
+      margin: 28px 0;
+      color: #0f172a;
+    }
+
+    .answers {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .answer-btn {
+      background: #dbeafe;
+      color: #1e40af;
+      border: 2px solid #bfdbfe;
+      padding: 18px 10px;
+      font-size: 24px;
+      font-weight: bold;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: transform 0.15s, background 0.15s;
+    }
+
+    .answer-btn:hover:not(:disabled) {
+      background: #bfdbfe;
+      transform: scale(1.03);
+    }
+
+    .answer-btn:disabled {
+      cursor: default;
+      opacity: 0.85;
+    }
+
+    .answer-btn.correct {
+      background: #bbf7d0;
+      border-color: #22c55e;
+      color: #166534;
+    }
+
+    .answer-btn.wrong {
+      background: #fecaca;
+      border-color: #ef4444;
+      color: #991b1b;
+    }
+
+    #feedback {
+      min-height: 35px;
+      margin: 18px 0;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .main-btn {
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 25px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 8px;
+    }
+
+    .main-btn:hover {
+      background: #1d4ed8;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    #result h2 {
+      font-size: 32px;
+      color: #1d4ed8;
+    }
+
+    #finalScore {
+      font-size: 28px;
+      font-weight: bold;
+      margin: 18px;
+    }
+
+    #championMessage {
+      font-size: 20px;
+      line-height: 1.5;
+    }
+
+    .note {
+      font-size: 13px;
+      color: #64748b;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+
+      .game {
+        padding: 18px;
+        margin: 8px auto;
+      }
+
+      h1 {
+        font-size: 25px;
+      }
+
+      #question {
+        font-size: 32px;
+      }
+
+      .answer-btn {
+        font-size: 21px;
+        padding: 15px 5px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="game">
+    <h1>🧠 Vedic Maths Speed Challenge</h1>
+    <p class="subtitle">Think fast. Calculate smart. Become a Maths Champion!</p>
+
+    <div class="top-bar">
+      <div class="pill">🏆 Score: <span id="score">0</span></div>
+      <div class="pill">📝 Question: <span id="questionNumber">0</span>/10</div>
+      <div class="pill" id="timer">⏱️ Time: 15s</div>
+    </div>
+
+    <button id="soundBtn" type="button">🔊 Sound: ON</button>
+
+    <div class="progress-track">
+      <div id="progress"></div>
+    </div>
+
+    <div id="welcome">
+      <h2>Are you ready?</h2>
+      <p>Answer 10 addition and subtraction questions.</p>
+      <p>You get <strong>15 seconds</strong> for each question.</p>
+      <p>Earn <strong>10 points</strong> for every correct answer!</p>
+      <button class="main-btn" id="startBtn" type="button">🚀 Start Game</button>
+    </div>
+
+    <div id="quiz" class="hidden">
+      <div id="question">25 + 17 = ?</div>
+      <div class="answers" id="answers"></div>
+      <div id="feedback" aria-live="polite"></div>
+    </div>
+
+    <div id="result" class="hidden">
+      <h2 id="resultTitle">🎉 Game Complete!</h2>
+      <div id="finalScore">Your score: 0 / 100</div>
+      <p id="championMessage"></p>
+      <button class="main-btn" id="playAgainBtn" type="button">🔄 Play Again</button>
+    </div>
+
+    <p class="note">Made for young maths champions • Works offline • No personal details needed</p>
+  </div>
+
+  <script>
+    // ---------------------------------
+    // 1. GAME SETTINGS AND QUESTIONS
+    // ---------------------------------
+
+    const TIME_PER_QUESTION = 15;
+    const POINTS_PER_CORRECT = 10;
+
+    const questionBank = [
+      { q: "48 + 27", answer: 75 },
+      { q: "93 - 46", answer: 47 },
+      { q: "125 + 68", answer: 193 },
+      { q: "200 - 87", answer: 113 },
+      { q: "356 + 144", answer: 500 },
+      { q: "500 - 275", answer: 225 },
+      { q: "999 + 125", answer: 1124 },
+      { q: "1000 - 468", answer: 532 },
+      { q: "247 + 389", answer: 636 },
+      { q: "804 - 297", answer: 507 }
+    ];
+
+    // ---------------------------------
+    // 2. GAME VARIABLES
+    // ---------------------------------
+
+    let questions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let timeLeft = TIME_PER_QUESTION;
+    let timer = null;
+    let nextQuestionTimer = null;
+    let locked = true;
+
+    // Sound variables are declared only once here.
+    let soundEnabled = true;
+    let audioContext = null;
+
+    const scoreEl = document.getElementById("score");
+    const questionNumberEl = document.getElementById("questionNumber");
+    const timerEl = document.getElementById("timer");
+    const progressEl = document.getElementById("progress");
+    const questionEl = document.getElementById("question");
+    const answersEl = document.getElementById("answers");
+    const feedbackEl = document.getElementById("feedback");
+
+    const welcomeEl = document.getElementById("welcome");
+    const quizEl = document.getElementById("quiz");
+    const resultEl = document.getElementById("result");
+
+    const soundBtn = document.getElementById("soundBtn");
+    const startBtn = document.getElementById("startBtn");
+    const playAgainBtn = document.getElementById("playAgainBtn");
+
+    // ---------------------------------
+    // 3. LOUDER SOUND EFFECTS
+    // ---------------------------------
+
+    function prepareAudio() {
+      if (!soundEnabled) return;
+
+      try {
+        const AudioClass =
+          window.AudioContext || window.webkitAudioContext;
+
+        if (!AudioClass) return;
+
+        if (!audioContext) {
+          audioContext = new AudioClass();
+        }
+
+        if (audioContext.state === "suspended") {
+          audioContext.resume();
+        }
+      } catch (error) {
+        // The game can still work without sound.
+      }
+    }
+
+    function playTone(frequency, start, duration, type, volume) {
+      if (!soundEnabled || !audioContext) return;
+      if (audioContext.state !== "running") return;
+
+      try {
+        const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+
+        oscillator.type = type;
+        oscillator.frequency.setValueAtTime(frequency, start);
+
+        gain.gain.setValueAtTime(0.001, start);
+        gain.gain.exponentialRampToValueAtTime(
+          volume, start + 0.025
+        );
+        gain.gain.setValueAtTime(
+          volume, start + duration * 0.55
+        );
+        gain.gain.exponentialRampToValueAtTime(
+          0.001, start + duration
+        );
+
+        oscillator.connect(gain);
+        gain.connect(audioContext.destination);
+
+        oscillator.start(start);
+        oscillator.stop(start + duration + 0.03);
+      } catch (error) {
+        // Ignore sound errors.
+      }
+    }
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+
+      prepareAudio();
+
+      if (!audioContext || audioContext.state !== "running") {
+        return;
+      }
+
+      const now = audioContext.currentTime;
+
+      if (type === "correct") {
+        // Bright, celebratory three-note chime.
+        playTone(660, now,        0.25, "triangle", 0.75);
+        playTone(830, now + 0.18, 0.25, "triangle", 0.75);
+        playTone(1050, now + 0.36, 0.42, "triangle", 0.75);
+
+      } else if (type === "incorrect") {
+        // Two-note descending sound.
+        playTone(330, now,        0.28, "square", 0.35);
+        playTone(220, now + 0.22, 0.38, "triangle", 0.50);
+
+      } else if (type === "champion") {
+        // Longer celebration melody.
+        playTone(523, now,        0.30, "triangle", 0.75);
+        playTone(659, now + 0.20, 0.30, "triangle", 0.75);
+        playTone(784, now + 0.40, 0.30, "triangle", 0.75);
+        playTone(1047, now + 0.60, 0.60, "triangle", 0.75);
+      }
+    }
+
+    soundBtn.addEventListener("click", function () {
+      soundEnabled = !soundEnabled;
+
+      soundBtn.textContent = soundEnabled
+        ? "🔊 Sound: ON"
+        : "🔇 Sound: OFF";
+
+      if (soundEnabled) {
+        prepareAudio();
+      }
+    });
+
+    // ---------------------------------
+    // 4. CREATE ANSWER OPTIONS
+    // ---------------------------------
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+
+      return array;
+    }
+
+    function createOptions(correctAnswer) {
+      const options = new Set([correctAnswer]);
+
+      while (options.size < 4) {
+        const difference = Math.floor(Math.random() * 31) - 15;
+        const wrongAnswer = correctAnswer + difference;
+
+        if (wrongAnswer >= 0 && wrongAnswer !== correctAnswer) {
+          options.add(wrongAnswer);
+        }
+      }
+
+      return shuffle(Array.from(options));
+    }
+
+    // ---------------------------------
+    // 5. START OR RESTART THE GAME
+    // ---------------------------------
+
+    function startGame() {
+      prepareAudio();
+
+      clearInterval(timer);
+      clearTimeout(nextQuestionTimer);
+
+      questions = shuffle([...questionBank]);
+      currentIndex = 0;
+      score = 0;
+      timeLeft = TIME_PER_QUESTION;
+      locked = true;
+
+      scoreEl.textContent = score;
+      progressEl.style.width = "0%";
+
+      welcomeEl.classList.add("hidden");
+      resultEl.classList.add("hidden");
+      quizEl.classList.remove("hidden");
+
+      showQuestion();
+    }
+
+    // ---------------------------------
+    // 6. DISPLAY EACH QUESTION
+    // ---------------------------------
+
+    function showQuestion() {
+      clearInterval(timer);
+      clearTimeout(nextQuestionTimer);
+
+      if (currentIndex >= questions.length) {
+        endGame();
+        return;
+      }
+
+      locked = false;
+      timeLeft = TIME_PER_QUESTION;
+
+      const currentQuestion = questions[currentIndex];
+
+      questionNumberEl.textContent = currentIndex + 1;
+      questionEl.textContent = currentQuestion.q + " = ?";
+      feedbackEl.textContent = "";
+      timerEl.textContent = "⏱️ Time: " + timeLeft + "s";
+      progressEl.style.width =
+        (currentIndex / questions.length * 100) + "%";
+
+      answersEl.innerHTML = "";
+
+      const options = createOptions(currentQuestion.answer);
+
+      options.forEach(function (option) {
+        const button = document.createElement("button");
+
+        button.type = "button";
+        button.className = "answer-btn";
+        button.textContent = option;
+
+        button.addEventListener("click", function () {
+          checkAnswer(option, button);
+        });
+
+        answersEl.appendChild(button);
+      });
+
+      timer = setInterval(function () {
+        timeLeft--;
+        timerEl.textContent = "⏱️ Time: " + timeLeft + "s";
+
+        if (timeLeft <= 5) {
+          timerEl.style.background = "#fee2e2";
+          timerEl.style.color = "#991b1b";
+        } else {
+          timerEl.style.background = "#fef3c7";
+          timerEl.style.color = "#92400e";
+        }
+
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          handleTimeout();
+        }
+      }, 1000);
+    }
+
+    // ---------------------------------
+    // 7. CHECK THE ANSWER
+    // ---------------------------------
+
+    function checkAnswer(selectedAnswer, selectedButton) {
+      if (locked) return;
+
+      locked = true;
+      clearInterval(timer);
+
+      const correctAnswer = questions[currentIndex].answer;
+      const allButtons = answersEl.querySelectorAll("button");
+
+      allButtons.forEach(function (button) {
+        button.disabled = true;
+
+        if (Number(button.textContent) === correctAnswer) {
+          button.classList.add("correct");
+        }
+      });
+
+      if (selectedAnswer === correctAnswer) {
+        score += POINTS_PER_CORRECT;
+        scoreEl.textContent = score;
+
+        feedbackEl.textContent = "🎉 Excellent! Correct answer!";
+        feedbackEl.style.color = "#15803d";
+
+        playSound("correct");
+      } else {
+        selectedButton.classList.add("wrong");
+
+        feedbackEl.textContent =
+          "💪 Good try! The answer is " + correctAnswer + ".";
+        feedbackEl.style.color = "#b91c1c";
+
+        playSound("incorrect");
+      }
+
+      progressEl.style.width =
+        ((currentIndex + 1) / questions.length * 100) + "%";
+
+      nextQuestionTimer = setTimeout(function () {
+        currentIndex++;
+        showQuestion();
+      }, 1200);
+    }
+
+    // ---------------------------------
+    // 8. WHEN TIME RUNS OUT
+    // ---------------------------------
+
+    function handleTimeout() {
+      if (locked) return;
+
+      locked = true;
+
+      const correctAnswer = questions[currentIndex].answer;
+      const allButtons = answersEl.querySelectorAll("button");
+
+      allButtons.forEach(function (button) {
+        button.disabled = true;
+
+        if (Number(button.textContent) === correctAnswer) {
+          button.classList.add("correct");
+        }
+      });
+
+      feedbackEl.textContent =
+        "⏰ Time's up! The answer was " + correctAnswer + ".";
+      feedbackEl.style.color = "#b91c1c";
+
+      playSound("incorrect");
+
+      progressEl.style.width =
+        ((currentIndex + 1) / questions.length * 100) + "%";
+
+      nextQuestionTimer = setTimeout(function () {
+        currentIndex++;
+        showQuestion();
+      }, 1200);
+    }
+
+    // ---------------------------------
+    // 9. FINAL SCORE AND CHAMPION TITLE
+    // ---------------------------------
+
+    function endGame() {
+      clearInterval(timer);
+      clearTimeout(nextQuestionTimer);
+
+      quizEl.classList.add("hidden");
+      resultEl.classList.remove("hidden");
+
+      document.getElementById("finalScore").textContent =
+        "Your score: " + score + " / 100";
+
+      const resultTitle = document.getElementById("resultTitle");
+      const championMessage =
+        document.getElementById("championMessage");
+
+      if (score === 100) {
+        resultTitle.textContent = "🏆 VEDIC MATHS SUPER CHAMPION!";
+        championMessage.textContent =
+          "Perfect score! You answered every question correctly. Amazing mental maths skills!";
+        playSound("champion");
+
+      } else if (score >= 70) {
+        resultTitle.textContent = "🥇 Maths Champion!";
+        championMessage.textContent =
+          "Fantastic work! Your mental maths is getting stronger. Keep practising!";
+
+      } else if (score >= 40) {
+        resultTitle.textContent = "🥈 Rising Maths Star!";
+        championMessage.textContent =
+          "Well done! Keep practising and you can reach the top score next time.";
+
+      } else {
+        resultTitle.textContent = "🌟 Maths Explorer!";
+        championMessage.textContent =
+          "Great effort for trying! Every practice round helps your brain get faster. Try again!";
+      }
+
+      progressEl.style.width = "100%";
+    }
+
+    // ---------------------------------
+    // 10. BUTTON EVENTS
+    // ---------------------------------
+
+    startBtn.addEventListener("click", startGame);
+    playAgainBtn.addEventListener("click", startGame);
+  </script>
+</body>
+</html>
